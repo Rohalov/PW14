@@ -1,0 +1,73 @@
+﻿@page "/products"
+@inject ProductService _productService
+
+<PageTitle>Products</PageTitle>
+
+<h3>Products</h3>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Price</th>
+			<th>IsInStock</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var product in products)
+		{
+			<tr>
+				<td>
+					<input type="text" @bind="product.Name" />
+				</td>
+				<td>
+					<input type="number" @bind="@product.Price" />
+				</td>
+				<td>
+					<input type="checkbox" checked=@product.IsInStock />
+				</td>
+				<td>
+					<button @onclick="(()=>UpdateProductAsync(product))">Save</button>
+					<button @onclick="(() => DeleteProductAsync(product.Id))">Delete</button>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="AddProductAsync">Add Product</button>
+
+@code {
+	private List<Product> products;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var result = await _productService.GetProductsAsync();
+		products = result;
+	}
+
+	private async Task AddProductAsync()
+	{
+		var product = new Product
+		{
+			Name = "",
+			Price = 0,
+			IsInStock = true
+		};
+		await _productService.AddProductAsync(product);
+		await OnInitializedAsync();
+	}
+
+	private async Task UpdateProductAsync(Product product)
+	{
+		await _productService.UpdateProductAsync(product.Id, product);
+		await OnInitializedAsync();
+	}
+
+	private async Task DeleteProductAsync(int id)
+	{
+		await _productService.DeleteProductAsync(id);
+		await OnInitializedAsync();
+	}
+}
